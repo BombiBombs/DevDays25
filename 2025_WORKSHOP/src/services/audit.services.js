@@ -23,7 +23,7 @@ export const auditIssues = async () => {
    totalIssues: totalIssues,
    issuesWithBugInTitle: issuesWithBugInTitle.length,
    ratioWithBugInTitle: ratioWithBugInTitle,
-   operation: 'ratioWithBugInTitle <= AAAA0.50'
+   operation: 'ratioWithBugInTitle <= 0.50'
   },
   evidences: issuesWithBugInTitle
  };
