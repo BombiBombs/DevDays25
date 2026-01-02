@@ -8,6 +8,6 @@ userRouter.get('/users', getUsers);
 userRouter.get('/users/:id', getUser);
 userRouter.post('/users', validateCreateUser, addUser);
 userRouter.delete('/users/:id', removeUser);
-userRouter.put('/users/:id', modifyUser);
+userRouter.put('/users/:id', validateCreateUser, modifyUser);
 
 export { userRouter };

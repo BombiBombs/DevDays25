@@ -35,24 +35,15 @@ export const createUser = (user) => {
     return newUser;
 };
 export const updateUser = (id, userData) => {
-    // 1. Buscamos la posición exacta en el array
+
     const index = users.findIndex(u => u.id === String(id));
-
     if (index !== -1) {
-        // 2. MODIFICACIÓN REAL:
-        // Creamos un nuevo objeto con los datos viejos + los nuevos
-        // El ID se queda fijo para que no lo rompan
-        const updatedUser = { 
-            ...users[index], 
-            ...userData, 
-            id: users[index].id 
+        const updatedUser = {
+            ...users[index],
+            ...userData,
+            id: users[index].id
         };
-
-        // 3. REEMPLAZO EN EL ARRAY:
-        // Esto es lo que hace que la lista realmente cambie
         users[index] = updatedUser;
-
-        // 4. Devolvemos el objeto ya actualizado
         return users[index];
     }
     
