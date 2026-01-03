@@ -7,12 +7,13 @@ import { auditRouter } from './routes/audit.routes.js';
 import { aiRouter } from './routes/ai.routes.js';
 import { telemetryRouter } from './routes/telemetry.routes.js';
 import cors from 'cors';
+import { weatherRouter } from './routes/weather.routes.js';
 const app = express();
 app.use(express.json());
 app.use('/api/v1', aiRouter);
 
 app.use(cors({
-  origin: 'http://localhost:3001', // La URL de tu frontend de Next.js
+  origin: 'http://localhost:3001', // La URL del frontend de Next.js
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
@@ -21,7 +22,7 @@ app.use('/api/v1', auditRouter);
 app.get('/', (req, res) => {
     res.send('Hello World!');
 });
-
+app.use('/api/v1', weatherRouter);
 app.use('/api/v1', userRouter);
 bundle('src/docs/openapi.yaml')
     .then((api) => {
