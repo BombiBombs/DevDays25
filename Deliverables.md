@@ -41,4 +41,85 @@ En el frontend, se ha desarrollado una arquitectura de visualización mediante l
 1. **Estado de Carga:** Una interfaz de espera optimizada para la experiencia de usuario.
 2. **Estado de Error:** Un sistema de control que detecta fallos de conexión con el backend y ofrece la opción de reintentar la carga.
 3. **Estado de Éxito:** El panel principal que renderiza el dashboard profesional, el cual incluye un **Gauge circular dinámico** para el ratio de cumplimiento, indicadores de métricas críticas (total de issues vs bugs detectados) y un listado detallado de evidencias con enlaces directos a GitHub.
-## Entregables Nivel 2
+## Entregables Nivel 2- Propuesta 2
+### N2-P2-A Auditoría sobre datos meteorológicos.
+### 1. Arquitectura de Datos (Mantenimiento de Weathers)
+
+### Modelo: `weather.model.js`
+Utiliza **Mongoose** para definir la estructura de los registros diarios:
+* **city**: Nombre de la ubicación.
+* **date**: Día del registro.
+* **temperature**: Temperatura promedio del día en °C.
+
+### Repositorio: `weather.repository.js`
+Gestiona el acceso a la base de datos con las siguientes funciones:
+* `findAll`: Recupera todos los registros.
+* `findByCityAndDate`: Busca un día específico.
+* `findByCityAndInterval`: Filtra por rango de fechas.
+* `findByCity`: Devuelve todo el histórico de una ciudad, ordenado cronológicamente (del más antiguo al más reciente).
+* `create`: Para insertar nuevos registros.
+
+---
+
+## 2. Servicio de Weather (`weather.service.js`)
+
+El proceso de recolección de datos se divide en tres fases:
+
+### A. Geocodificación (`getCoordinates`)
+Debido a que OpenMeteo requiere coordenadas, esta función auxiliar consulta:
+`https://geocoding-api.open-meteo.com/v1/search`
+* **Parámetros**: `name=ciudad`, `count=1`, `language=es`, `format=json`.
+* **Retorno**: Latitud y Longitud.
+
+### B. Captura de Datos (`fetchWeatherData`)
+Llama a la API de histórico/previsión:
+`https://api.open-meteo.com/v1/forecast`
+* **Parámetros**: `latitude=latitud geógráfica`, `longitude=longitud geógráfica`, `start_date=fecha inicio`, `end_date= fecha fin`, `daily= dato solicitado diario temperature_2m_mean`
+* **Retorno**: Respuesta de la API en formato JSON.
+
+### C. Persistencia (`saveWeathers`)
+Como la API devuelve dos arrays paralelos (fechas y temperaturas). El servicio:
+1.  Recorre ambos arrays mediante **bucles for**.
+2.  Mapea los datos a objetos del modelo `Weather`.
+3.  Los guarda en la base de datos a través del repositorio.
+
+---
+
+## 3. Sistema de Auditoría (`audit.service.js`)
+
+La lógica de auditoría garantiza que solo se procesen **semanas completas (Lunes a Domingo)**.
+
+### Lógica de Selección y Descarte: `auditWeathers`
+1.  Se obtienen todos los registros de una ciudad mediante `findByCity`.
+2.  **Sincronización**: Se utiliza un índice para verificar si el registro más antiguo es **Lunes**.
+3.  Si no es lunes, el sistema **descarta** los días necesarios hasta encontrar el primer lunes.
+4.  Solo si hay datos suficientes para completar bloques de los 7 días completos, se procede a la auditoría llamando a `performAudit` para cada semana.
+
+### Ejecución: `performAudit`
+Por cada semana completa, se crea un registro de auditoría con:
+* **ID y Fecha de creación**: Generados automáticamente.
+* **Cálculo de Media**: Promedio de las temperaturas de los 7 días.
+* **Compliant**: `true` si la media es **> 18 °C**.
+* **Metadata**: 
+    * Ciudad
+    * Rango de la semana (`weekRange`).
+    * Temperatura media calculada.
+    * Operación realizada: `"average temperature >18"`.
+* **Evidencias**: Los 7 objetos completos de `weather` de esa semana.
+
+---
+
+## 4. Endpoints de la API
+
+### Módulo Weather
+| Método | Ruta | Función Controller | Descripción |
+| :--- | :--- | :--- | :--- |
+| **GET** | `/weather` | `getAllWeathers` | Lista todos los datos climáticos. |
+| **POST** | `/weathers` | `fetchAndSaveWeathers` | Recoge datos de la API externa (Body: `city`, `start_date`, `end_date`). |
+
+### Módulo Audit
+| Método | Ruta | Función Controller | Descripción |
+| :--- | :--- | :--- | :--- |
+| **POST** | `/audits` | `auditWeathers` | Ejecuta la auditoría semanal de los weathers existentes (Body: `city`). |
+
+---
