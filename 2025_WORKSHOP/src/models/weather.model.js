@@ -13,15 +13,15 @@ const weatherSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
-    weatherStatus: {
+    weatherStatus: {  //descripcion del estado del tiempo
         type: String,
         required: true,
     },
-    precipitationProbability: {
+    precipitationSum: {  //suma de precipitacion
         type: Number,
         required: true,
     },
-    windSpeed: {
+    windSpeed: {  //maxima velocidad del viento a 10m
         type: Number,
         required: true,
     },

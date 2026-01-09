@@ -8,7 +8,7 @@ const tracer = trace.getTracer('weather-service-tracer');
 async function fetchWeatherData(ciudad, startDate, endDate) {
     try {
     const { latitude, longitude } = await getCoordinates(ciudad);
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&start_date=${startDate}&end_date=${endDate}&daily=temperature_2m_mean,,weather_code,precipitation_probability_mean,wind_speed_10m_mean,cloud_cover_mean`;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&start_date=${startDate}&end_date=${endDate}&daily=temperature_2m_mean,weather_code,precipitation_sum,wind_speed_10m_max,cloud_cover_mean`;
 
     const spanApi = tracer.startSpan('api:open-meteo-fetch');
     const startTime = Date.now();
@@ -64,8 +64,8 @@ export const saveWeathers = async (data, ciudad) => {
     const dates = data.daily.time;
     const temperatures = data.daily.temperature_2m_mean;
     const weatherCodes = data.daily.weather_code;
-    const precipitationProbabilities = data.daily.precipitation_probability_mean;
-    const windSpeeds = data.daily.wind_speed_10m_mean;
+    const precipitationSum = data.daily.precipitation_sum;
+    const windSpeeds = data.daily.wind_speed_10m_max;
     const cloudCovers = data.daily.cloud_cover_mean;
     for (let i = 0; i < dates.length; i++) {
         const weatherData = {
@@ -73,7 +73,7 @@ export const saveWeathers = async (data, ciudad) => {
             date: dates[i],
             temperature: temperatures[i],
             weatherStatus: weatherParser(weatherCodes[i]),
-            precipitationProbability: precipitationProbabilities[i],
+            precipitationSum: precipitationSum[i],
             windSpeed: windSpeeds[i],
             cloudCoverage: cloudCovers[i]
         };
