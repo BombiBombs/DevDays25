@@ -11,7 +11,8 @@ const findByCityAndInterval = async (city, startDate, endDate) => {
     return await Weather.find({
         city,
         date: { $gte: startDate, $lte: endDate }
-    });
+    })
+    .sort({ date: 1 });
 };
 const findByCity = async (city) => {
     return await Weather.find({ city }).sort({ date: 1 });

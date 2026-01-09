@@ -134,9 +134,53 @@ export const getAverageTemperatureInterval = async (city, startDate, endDate) =>
     const totalTemp = weathers.reduce((sum, weather) => sum + weather.temperature, 0);
     return totalTemp / weathers.length;
 };
+export const getWeatherStatusInterval = async (city, startDate, endDate) => {
+    const weathers =  await weatherRepository.findByCityAndInterval(city, startDate, endDate);
+    if (weathers.length === 0) {
+        return null;
+    }
+    const statusList = [];
+    weathers.forEach(weather => {
+        statusList.push(weather.weatherStatus+"-"+weather.date);
+    });
+    return statusList;
+}
+export const getTotalPrecipitationInterval = async (city, startDate, endDate) => {
+    const weathers =  await weatherRepository.findByCityAndInterval(city, startDate, endDate);
+    if (weathers.length === 0) {
+        return null;
+    }
+    const totalPrecipitation = weathers.reduce((sum, weather) => sum + weather.precipitationSum, 0);
+    return totalPrecipitation;
+};
+export const getMaxWindSpeedInterval = async (city, startDate, endDate) => {
+    const weathers =  await weatherRepository.findByCityAndInterval(city, startDate, endDate);
+    if (weathers.length === 0) {
+        return null;
+    }
+    let maxWindSpeed = 0;
+    weathers.forEach(weather => {
+        if (weather.windSpeed > maxWindSpeed) {
+            maxWindSpeed = weather.windSpeed;
+        }
+    });
+    return maxWindSpeed;
+};
+export const getAverageCloudCoverageInterval = async (city, startDate, endDate) => {
+    const weathers =  await weatherRepository.findByCityAndInterval(city, startDate, endDate);
+    if (weathers.length === 0) {
+        return null;
+    }
+    const totalCloudCoverage = weathers.reduce((sum, weather) => sum + weather.cloudCoverage, 0);
+    return totalCloudCoverage / weathers.length;
+};
 export default {
     fetchWeatherData,
     saveWeathers,
     getAllWeathers,
-    getAverageTemperatureInterval
+    getAverageTemperatureInterval,
+    getWeatherStatusInterval,
+    getTotalPrecipitationInterval,
+    getMaxWindSpeedInterval,
+    getAverageCloudCoverageInterval
 };
