@@ -50,7 +50,10 @@ Utiliza **Mongoose** para definir la estructura de los registros diarios:
 * **city**: Nombre de la ubicación.
 * **date**: Día del registro.
 * **temperature**: Temperatura promedio del día en °C.
-
+* **weatherStatus**: `String` (Estado del cielo parseado, ej: "Despejado", "Tormenta").
+* **precipitationSum**: `Number` (Suma total de lluvia caida).
+* **windSpeed**: `Number` (Velocidad máxima del viento en km/h).
+* **cloudCoverage**: `Number` (Cobertura media de nubes en %).
 ### Repositorio: `weather.repository.js`
 Gestiona el acceso a la base de datos con las siguientes funciones:
 * `findAll`: Recupera todos los registros.
@@ -74,7 +77,7 @@ Debido a que OpenMeteo requiere coordenadas, esta función auxiliar consulta:
 ### B. Captura de Datos (`fetchWeatherData`)
 Llama a la API de histórico/previsión:
 `https://api.open-meteo.com/v1/forecast`
-* **Parámetros**: `latitude=latitud geógráfica`, `longitude=longitud geógráfica`, `start_date=fecha inicio`, `end_date= fecha fin`, `daily= dato solicitado diario temperature_2m_mean`
+* **Parámetros**: `latitude=latitud geógráfica`, `longitude=longitud geógráfica`, `start_date=fecha inicio`, `end_date= fecha fin`, `daily= dato solicitado diario: temperature_2m_mean,weather_code,precipitation_sum,wind_speed_10m_max,cloud_cover_mean`
 * **Retorno**: Respuesta de la API en formato JSON.
 
 ### C. Persistencia (`saveWeathers`)
