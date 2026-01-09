@@ -12,7 +12,23 @@ const weatherSchema = new mongoose.Schema({
     temperature: {
         type: Number,
         required: true,
-    }
+    },
+    weatherStatus: {
+        type: String,
+        required: true,
+    },
+    precipitationProbability: {
+        type: Number,
+        required: true,
+    },
+    windSpeed: {
+        type: Number,
+        required: true,
+    },
+    cloudCoverage: {
+        type: Number,
+        required: true,
+    },
 });
 
 const Weather = mongoose.model('Weather', weatherSchema);
