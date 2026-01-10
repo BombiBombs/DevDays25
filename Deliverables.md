@@ -126,3 +126,94 @@ Por cada semana completa, se crea un registro de auditoría con:
 | **POST** | `/audits` | `auditWeathers` | Ejecuta la auditoría semanal de los weathers existentes (Body: `city`). |
 
 ---
+### N2-P2-B Audio resumen del tiempo pasado con IA.
+
+### 1. Arquitectura de Inteligencia Artificial
+El sistema implementa un flujo de **Function Calling** diseñado para maximizar la precisión de los datos meteorológicos antes de su conversión a audio.
+
+
+
+#### Selección de Modelos
+* **Modelo de Lenguaje: `gpt-5-mini`**: Elegido por ser una versión más rápida y económica de GPT-5. Es ideal para tareas bien definidas e indicaciones precisas, como el procesamiento de herramientas (tools) y la generación de guiones estructurados.
+* **Modelo de Voz: `gpt-4o-mini-tts`**: Para aplicaciones inteligentes en tiempo real, utilizamos este modelo por ser el más reciente y fiable en la conversión de texto a voz, garantizando una respuesta fluida y natural.
+
+---
+
+### 2. Definición de la Herramienta Maestro (Tools)
+Para evitar "alucinaciones" de la IA en los cálculos estadísticos, se proporciona la herramienta `getWeatherAnalysis`.
+
+* **Función**: Centraliza la recuperación de datos históricos en un solo mensaje para el modelo.
+* **Parámetros**: `city`, `startDate`, `endDate`.
+* **Respuesta Agregada**: La IA recibe un resumen que incluye temperatura media, lluvia total, ráfaga máxima de viento y cobertura nubosa media.
+
+---
+
+### 3. Lógica de Servicio y Procesamiento de Datos
+El servicio `weather.service.js` proporciona los datos reales para la IA, garantizando la integridad de la información mediante:
+* **Agregación Estadística**: Cálculo de promedios para nubosidad y temperatura, y selección de máximos para el viento y sumas para la lluvia.
+
+---
+
+### 4. Flujo de Generación y Almacenamiento de Audio
+
+### Persona y Estilo
+Se inyectan instrucciones de sistema para que la IA actúe como un **presentador de noticias del clima**. El modelo procesa los datos y genera un guion natural en español, evitando anglicismos.
+
+### Persistencia de Archivos
+* **Generación**: El modelo `gpt-4o-mini-tts` procesa el guion y devuelve un buffer binario.
+* **Almacenamiento**: El archivo se guarda en la ruta `./uploads/audios/` con un nombre dinámico: `${ciudad.toLowerCase()}-${Date.now()}.mp3`.
+* **Respuesta**: El endpoint sirve el buffer directamente al cliente con el `Content-Type: audio/mpeg`.
+
+---
+
+### 5. Endpoints de la API
+
+| Método | Ruta | Función Controller | Descripción |
+| :--- | :--- | :--- | :--- |
+| **POST** | `/ai/weather` | `generateAIResponseWeather` | Genera y sirve un archivo de audio .mp3 con el resumen climático de los últimos 7 días. |
+
+**Ejemplo de Prompt en el Body:**
+```json
+{
+  "prompt": "Dime que tiempo ha hecho esta última semana en Sevilla"
+}
+```
+## Retos extra
+### N2-Ex-1 Hacer que la IA devuelva una respuesta estructurada en formato JSON.
+### 1. Definición del Esquema de Salida (Zod)
+Para garantizar que la IA devuelva siempre un JSON con una estructura predecible y válida, se ha implementado un esquema de validación utilizando la librería **Zod**.
+Creamos un objeto de tipo z.object llamado `umlZodSchema`
+* **Clases**: Un array de objetos que contienen el nombre de la clase, una lista de atributos y una lista de métodos.
+* **Relaciones**: Un array de objetos que definen el origen (`from`), el destino (`to`) y el tipo de relación.
+* **Tipos de Relación**: Restringidos mediante un **Enum** de Zod a los valores: `inheritance`, `composition`, `aggregation` y `association`.
+
+---
+
+### 2. Servicio de Procesamiento (`openai.service.js`)
+La función `generateJsonFromUML` utiliza la capacidad de **Structured Outputs** de OpenAI mediante el método `responses.parse`. A diferencia de una respuesta de texto común, este método fuerza a la IA a seguir el esquema definido.
+
+* **Modelo**: `gpt-5-mini` (Seleccionado por su alta eficiencia en tareas de lógica estructurada y bajo coste).
+* **Instrucciones**: Se le pide a la IA que procese el texto (PlantUML o Mermaid) y que limpie los datos eliminando los símbolos de visibilidad (como el `+` o el `-`) de los atributos y métodos para obtener un JSON más limpio.
+
+---
+
+### 3. Lógica del Controlador y Validación
+El controlador `generateAIJsonFromUMLResponse` es el encargado de recibir el prompt con el código UML y devolver la respuesta parseada al cliente.
+
+* **Entrada**: Código en texto plano (ej: `class Car { +String brand }`).
+* **Transformación**: La IA identifica semánticamente qué es una clase y qué es una relación, mapeándolo al esquema de Zod.
+* **Salida**: Un objeto JSON estructurado que puede ser consumido por otras herramientas o frontends de modelado.
+
+---
+
+### 4. Especificación del Endpoint
+
+| Método | Ruta | Función Controller | Descripción |
+| :--- | :--- | :--- | :--- |
+| **POST** | `/ai/uml-to-json` | `generateAIJsonFromUMLResponse` | Transforma un diagrama UML en texto plano a una estructura JSON organizada y validada. |
+
+**Ejemplo de entrada (Body):**
+```json
+{
+  "prompt": "class Persona { +String nombre \n +hablar() } class Estudiante extends Persona"
+}
