@@ -24,6 +24,7 @@ const AuditPage = () => {
       
       setAuditData(latestAudit);
     } catch (err) {
+      console.error(err);
       setError("Error al conectar con la base de datos");
     } finally {
       setLoading(false);
