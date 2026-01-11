@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getAllAudits, getAuditById, auditIssues, auditWeathers } from "../controllers/audit.controller.js";
+import { getAllAudits, getAuditById, auditIssues, auditWeathers, findAuditByCity } from "../controllers/audit.controller.js";
 
 const auditRouter = Router();
 
@@ -7,5 +7,5 @@ auditRouter.get('/audits', getAllAudits);
 auditRouter.get('/audits/:auditId', getAuditById);
 auditRouter.post('/audits/issues', auditIssues);
 auditRouter.post('/audits/weathers', auditWeathers);
-
+auditRouter.get('/audits/city/:city', findAuditByCity);
 export { auditRouter };

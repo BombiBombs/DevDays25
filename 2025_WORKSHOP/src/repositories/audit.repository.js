@@ -12,9 +12,12 @@ const create = async (auditData) => {
  const audit = new Audit(auditData);
  return await audit.save();
 };
-
+const findAuditByCity = async (city) => {
+ return await Audit.find({ 'metadata.ciudad': city });
+}
 export default {
  findAll,
  create,
  findByAuditId,
+ findAuditByCity
 };

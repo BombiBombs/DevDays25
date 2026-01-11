@@ -41,3 +41,13 @@ export const auditWeathers = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+export const findAuditByCity = async (req, res) => {
+    const city = req.params.city;
+    try {
+        const audits = await auditService.findAuditByCity(city);
+        res.status(200).json(audits);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};

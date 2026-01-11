@@ -80,7 +80,7 @@ const performAudit = async (weeklyWeathers, city) => {
         metadata: {
             ciudad: city,
             weekRange: `${weeklyWeathers[0].date.toISOString().split('T')[0]} / ${weeklyWeathers[6].date.toISOString().split('T')[0]}`,
-            averageTemp: average.toFixed(2),
+            averageTemp: average,
             operation: 'average temperature > 18'
         },
         evidences: weeklyWeathers
@@ -88,9 +88,13 @@ const performAudit = async (weeklyWeathers, city) => {
     const auditCreated = await auditRepository.create(auditRecord);
     return auditCreated;
 };
+const findAuditByCity = async (city) => {
+ return await auditRepository.findAuditByCity(city);
+}
 export default {
     getAllAudits,
     getAuditById,
     auditIssues,
-    auditWeathers
+    auditWeathers,
+    findAuditByCity
 };
