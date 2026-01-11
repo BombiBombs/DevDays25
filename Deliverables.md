@@ -270,7 +270,7 @@ El controlador `generateAIJsonFromUMLResponse` es el encargado de recibir el pro
 }
 ```
 ---
-### N2-Ex-1 Visualización y frontend sobre datos de auditoría.
+### N2-Ex-3 Visualización y frontend sobre datos de auditoría.
 
 #### 1. Librerías Especializadas para la Auditoría
 Para cumplir con los estándares de visualización técnica, se han integrado librerías líderes en el ecosistema React:
