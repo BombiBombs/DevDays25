@@ -199,11 +199,39 @@ Se inyectan instrucciones de sistema para que la IA actúe como un **presentador
   "prompt": "Dime que tiempo ha hecho esta última semana en Sevilla"
 }
 ```
+### N2-P2-C Instrumentación y Medición de Tiempos de Respuesta de la API Weather
+
+#### 1. Instrumentación Granular (Capa de Servicio y DB)
+A diferencia de una medición superficial, se ha instrumentado la aplicación para obtener visibilidad interna de los posibles cuellos de botella. La métrica `endpointDuration` captura latencias en tres niveles de profundidad:
+
+* **Nivel de Controlador:** Mide el tiempo total de ciclo de vida de la petición en el endpoint `fetchAndSaveWeathers`.
+* **Nivel de Servicio (APIs Externas):** Se han integrado medidores dentro de la lógica de negocio para supervisar cuánto tarda exactamente la API de Open-Meteo (`fetchWeatherAPI`) y el servicio de geocodificación (`api_geocoding`) para cada petición individual.
+* **Nivel de Persistencia (Base de Datos):** Se mide el tiempo de ejecución del proceso `database_save` al verificar y persistir los registros en MongoDB.
+
+#### 2. Exposición y Naturaleza de las Métricas
+* **Endpoint de Métricas:** Los datos recolectados por OpenTelemetry son expuestos en tiempo real en `http://localhost:9464/metrics` .
+* **Uso de Histogramas:** Se han implementado **Histogramas** para las métricas de duración. A diferencia de un contador, el histograma permite agregar múltiples peticiones y realizar cálculos estadísticos (como la suma de tiempos frente al conteo total), lo cual es fundamental para calcular medias de latencia precisas.
+
+#### 3. Configuración de Infraestructura y Contenedores
+Para habilitar el ecosistema de monitorización, se han realizado las siguientes acciones en la infraestructura:
+
+* **Archivo `prometheus.yml`:** Se ha creado este archivo con el fin de definir los "scrape targets". Es el componente que le indica a Prometheus de qué dirección y puerto (en este caso, el exportador de nuestra app en el 9464) debe extraer las métricas periódicamente.
+* **Actualización de `docker-compose-local.yml`:** Se ha modificado el manifiesto de infraestructura para desplegar automáticamente las imágenes de **Prometheus** y **Grafana**. Esto permite que el stack de observabilidad corra de forma nativa junto a la aplicación.
+
+#### 4. Visualización Avanzada en Grafana
+En Grafana, se ha configurado la fuente de datos (DataSource) apuntando a `http://prometheus:9090`. Utilizando un script de dashboard personalizado, se han habilitado las siguientes herramientas de análisis:
+
+* **Búsqueda Dinámica por Ciudad:** El auditor puede escribir o seleccionar cualquier ciudad para filtrar los datos. El dashboard se actualiza automáticamente gracias al uso de variables dinámicas basadas en las etiquetas de las métricas.
+* **Desglose de Tiempo por Paso:** Un gráfico de series temporales que permite visualizar por separado cuánto tiempo consume la API, la base de datos o el controlador, facilitando la identificación de la causa raíz de una lentitud.
+* **Estado de Alerta (Umbrales):** Un panel de tipo **Gauge** que monitoriza el tiempo medio. Se han definido umbrales visuales: verde para rendimiento óptimo, naranja para degradación y rojo si se supera el umbral crítico de 1 segundo (1000ms).
+* **Métricas de Volumen:** Un panel estadístico que contabiliza el total de peticiones procesadas por ciudad, permitiendo correlacionar el aumento de latencia con picos de tráfico.
+---
+
 ## Retos extra
 ### N2-Ex-1 Hacer que la IA devuelva una respuesta estructurada en formato JSON.
 ### 1. Definición del Esquema de Salida (Zod)
 Para garantizar que la IA devuelva siempre un JSON con una estructura predecible y válida, se ha implementado un esquema de validación utilizando la librería **Zod**.
-Creamos un objeto de tipo z.object llamado `umlZodSchema`
+Creamos un objeto de tipo z.object llamado `umlZodSchema` con el siguiente esquema.
 * **Clases**: Un array de objetos que contienen el nombre de la clase, una lista de atributos y una lista de métodos.
 * **Relaciones**: Un array de objetos que definen el origen (`from`), el destino (`to`) y el tipo de relación.
 * **Tipos de Relación**: Restringidos mediante un **Enum** de Zod a los valores: `inheritance`, `composition`, `aggregation` y `association`.
