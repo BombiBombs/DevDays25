@@ -217,3 +217,37 @@ El controlador `generateAIJsonFromUMLResponse` es el encargado de recibir el pro
 {
   "prompt": "class Persona { +String nombre \n +hablar() } class Estudiante extends Persona"
 }
+```
+### N2-Ex-1 Visualización y frontend sobre datos de auditoría.
+
+#### 1. Librerías Especializadas para la Auditoría
+Para cumplir con los estándares de visualización técnica, se han integrado librerías líderes en el ecosistema React:
+
+* **Recharts (Visualización de Datos):** Es el núcleo analítico del frontend. Permite transformar los JSON de la auditoría en gráficas interactivas.
+* **Lucide React (Iconografía Semántica):** Aporta la capa de coherencia visual mediante iconos vectoriales (viento, humedad, nubes, alertas). Ayuda a que el auditor identifique rápidamente el tipo de evidencia meteorológica sin necesidad de leer etiquetas de texto extensas.
+* **Dayjs (Gestión Temporal):** Utilizada para el tratamiento de fechas del histórico de 4 semanas. Permite la localización al español de los días de la semana y asegura que el rango de auditoría (Lunes a Domingo) se muestre correctamente al usuario.
+
+#### 2. Arquitectura de Componentes
+Se ha diseñado el frontend siguiendo principios de responsabilidad única para garantizar un código mantenible y escalable:
+
+* **Componentización:** La interfaz se fragmenta en componentes especializados (`CitySearch`, `WeatherAuditDashboard`, `AuditDropdown`) que se comunican de forma asíncrona mediante callbacks.
+* **Separación de Lógica:** Las llamadas a la API y el procesamiento de fechas (Lunes a Domingo) se gestionan a través de un servicio independiente (`lib/weatherService.ts`).
+
+#### 2. Búsqueda Dinámica y Flexibilidad de Localización
+El sistema ha sido diseñado para ser totalmente dinámico y no estar limitado a una ubicación predefinida:
+
+* **Auditoría Bajo Demanda:** A través del componente de búsqueda, el usuario puede introducir el nombre de **cualquier ciudad**. 
+* **Flujo en Tiempo Real:** Al introducir una ciudad, el sistema dispara un flujo completo que incluye la captura de datos históricos desde Open-Meteo, el almacenamiento en la base de datos y la ejecución de la lógica de auditoría para las últimas 4 semanas completas de dicha localización.
+
+#### 3. Visualización y Exposición de Datos
+La interfaz utiliza herramientas visuales de **Recharts** para exponer los resultados de la auditoría de forma técnica:
+
+* **Radial Gauge (Promedio Semanal):** * Representa la media térmica de la semana seleccionada con precisión de un decimal.
+    * El anillo del gauge cambia dinámicamente de color (**Verde** para sistemas conformes, **Rojo** para críticos) basándose en el booleano `compliant` de la base de datos.
+* **Bar Chart (Evolución Diaria):** * Muestra las temperaturas de los 7 días de la semana.
+    * **Umbral Crítico:** Se ha integrado una `ReferenceLine` fija en los **18°C**, lo que permite identificar visualmente de forma instantánea qué días fallaron la auditoría técnica.
+    * **Eje Y de Referencia:** Se ha habilitado un eje vertical con unidades de medida y etiquetas de datos sobre cada barra para una lectura exacta de los grados.
+
+#### 4. Coherencia Visual y Estilo
+* **Estética de Auditoría:** El diseño utiliza una paleta de colores técnica (Zinc/Dark) con un encabezado fijo y efectos de desenfoque (*backdrop-blur*) que emulan un dashboard de monitorización profesional.
+* **Diseño Responsive:** Uso de una rejilla adaptativa (`grid-cols-1 md:grid-cols-3`) que asegura la correcta visualización de las gráficas tanto en monitores de escritorio como en dispositivos móviles.
