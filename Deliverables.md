@@ -29,6 +29,27 @@ Este documento contiene la lista completa de los entregables resueltos y cómo s
     * Identificación del patrón `rel="next"` para automatizar la navegación entre las páginas de la API.
 * **Refactorización de (`fetchGithubIssues`):**
     * Sustitución del método de carga simple por el sistema de paginación completa, garantizando que el dashboard trabaje con el 100% de la información del repositorio.
+
+### N1-2 Creación de métricas personalizadas
+**Descripción:**
+#### 1. Definición de la Métrica
+* **Nombre de la métrica:** `audit_issues_open_count`
+* **Tipo:** **Gauge** (Instrumento de medida de estado).
+* **Unidad:** Unidades enteras (issues).
+* **Descripción:** Representa el número total de incidencias abiertas en un repositorio en el momento exacto de la auditoría.
+
+#### 2. Uso del Gauge
+A diferencia de un **Counter** , que es monótonamente creciente y solo sirve para acumular eventos, se ha seleccionado un **Gauge**. 
+* **Comportamiento:** El Gauge permite medir un valor que puede aumentar o disminuir. En el contexto de GitHub, las issues se abren y se cierran; por tanto, un contador no reflejaría la realidad del "backlog" actual, mientras que el Gauge captura una **fotografía (snapshot)** del estado neto del sistema.
+* **Instrumentación:** Se utiliza el método `.record()` lo que garantiza que cada nueva auditoría sobrescriba el valor anterior en Prometheus, reflejando fielmente si el equipo está resolviendo trabajo o acumulándolo.
+
+#### 3. Identificación de Información Útil (Labels Dinámicos)
+Para transformar un dato bruto en información accionable, se han instrumentado etiquetas (labels) que aportan contexto de negocio:
+
+* **`repositorio`:** Identifica dinámicamente el proyecto auditado. El valor se extrae automáticamente procesando la URL de la issue (`issues[0].url.split('/')[3]`), permitiendo que la métrica sea agnóstica al proyecto.
+* **`estadoSevero` (Umbral de Alerta):** Se ha definido un **Threshold (Umbral) de 20 bugs**. 
+    * Si `issuesOpened > 20`, la métrica se etiqueta como `severo`.
+    * En caso contrario, se etiqueta como `normal`.
 ### N1-3 Integración de proveedores IA.
 **Descripción:**
 Para llevar a cabo esto, se ha integrado **Ollama** como motor de inferencia local. Tras la instalación del software y el despliegue del modelo **Llama 3.2:1b** mediante consola, el sistema se comunica con el servicio `ollama.service.js`.
