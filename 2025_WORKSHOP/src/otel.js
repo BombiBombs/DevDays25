@@ -9,7 +9,7 @@ import {
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import { ConsoleMetricExporter, MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { metrics } from '@opentelemetry/api';
-
+import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 
 
 
@@ -55,15 +55,37 @@ registerInstrumentations({
         }),
     ],
 });
+const prometheusExporter = new PrometheusExporter({
+    port: 9464, // Puerto donde Prometheus hará el 'scrape'
+    endpoint: '/metrics',
+}, () => {
+    console.log('Prometheus metrics server started on http://localhost:9464/metrics');
+});
+
 const meterProvider = new MeterProvider({
-    resource,
+    resource: resource,
     readers: [
-    new PeriodicExportingMetricReader({
-        exporter: new ConsoleMetricExporter(),
-        exportIntervalMillis: 5000,
-    }),
+        prometheusExporter,
+        new PeriodicExportingMetricReader({
+            exporter: new ConsoleMetricExporter(),
+            exportIntervalMillis: 5000,
+        })
     ],
 });
 // Registrar globalmente
 metrics.setGlobalMeterProvider(meterProvider);
 
+const meterIssue = metrics.getMeter('auditIssue-service-meter');
+const BUG_UMBRAL= 20;
+export const issueGauge = meterIssue.createGauge('audit_open_issues_count', {
+    description: 'Número de issues abiertas detectados en las auditorías',
+    unit : 'number',
+
+});
+
+
+const meter = metrics.getMeter('weather-service-meter');
+export const endpointDuration = meter.createHistogram('http_server_duration', {
+    description: 'Tiempo de respuesta de mis endpoints en ms',
+    unit: 'ms',
+});

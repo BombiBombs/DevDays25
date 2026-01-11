@@ -1,7 +1,7 @@
 import auditRepository from '../repositories/audit.repository.js';
 import IssueRepository from '../repositories/issue.repository.js';
 import weatherRepository from '../repositories/weather.repository.js';
-
+import { issueGauge } from '../otel.js';
 export const getAllAudits = async () => {
     return await auditRepository.findAll();
 };
@@ -15,6 +15,7 @@ export const auditIssues = async () => {
     const issuesWithBugInTitle = issues.filter(issue => /bug/i.test(issue.title));
     const totalIssues = issues.length;
     const ratioWithBugInTitle = totalIssues === 0 ? 0 : issuesWithBugInTitle.length / totalIssues;
+    const issuesOpened = issues.filter(issue => issue.state === 'open').length;
     const auditRecord = {
         auditId: `audit-${Date.now()}`,
         createdAt: new Date(),
@@ -27,7 +28,14 @@ export const auditIssues = async () => {
         },
         evidences: issuesWithBugInTitle
     };
+    const BUG_UMBRAL= 20;
+    //  https://github.com/glzr-io/glazewm/issues/1233
+    const nombreRepo = issues[0].url.split('/')[3];
     const auditCreated = await auditRepository.create(auditRecord);
+            issueGauge.record(issuesOpened, { 
+                estadoSevero: issuesOpened > BUG_UMBRAL ? 'severo' : 'normal', 
+                repositorio: nombreRepo
+            });
     return auditCreated;
 };
 
@@ -86,6 +94,7 @@ const performAudit = async (weeklyWeathers, city) => {
         evidences: weeklyWeathers
     };
     const auditCreated = await auditRepository.create(auditRecord);
+
     return auditCreated;
 };
 const findAuditByCity = async (city) => {
