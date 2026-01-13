@@ -33,7 +33,7 @@ POST	`http://localhost:3000/api/v1/ai/weather`	genera y sirve un archivo de audi
 }
 ```
 ## N2-P2-C
-En Grafana, se ha configurado la fuente de datos (DataSource) apuntando a http://prometheus:9090. Utilizando un script de dashboard personalizado, que se importa dicho JSON que se encuentra en el proyecto.
+En Grafana, se ha configurado la fuente de datos (DataSource) apuntando a http://prometheus:9090. Utilizando un script de dashboard personalizado, que se importa dicho JSON que se encuentra en la raíz del proyecto, que se llama `Monitorización Meteorológica.json`
 ## N2-Ex-1
 endpoint POST	`http://localhost:3000/api/v1/ai/uml-to-json`	Transforma un diagrama UML en texto plano a una estructura JSON organizada y validada.
 Body:
