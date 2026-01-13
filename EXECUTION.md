@@ -26,7 +26,7 @@ Acceder desde el navegador a `http://localhost:8080/audit`
 * endpoint POST  `http://localhost:3000/api/v1/audits` ejecuta la auditoría semanal de los weathers existentes Body: `city` 
 * endpoint GET `http://localhost:3000/api/v1/audits/city/:ciudad` encuentra las auditorias de dicha ciudad segun el parametro de la peticion.
 ## N2-P2-B
-POST	`http://localhost:3000/api/v1/ai/weather`	genera y sirve un archivo de audio .mp3 con el resumen climático Body:
+POST	`http://localhost:3000/api/v1/ai/weather`	genera y sirve un archivo de audio .mp3 con el resumen climático, que se podrá encontrar en la carpeta de uploads/audios dentro del proyecto de backend, Body:
 ```json
 {
   "prompt": "Dime que tiempo ha hecho esta última semana en Sevilla"
