@@ -100,10 +100,14 @@ const performAudit = async (weeklyWeathers, city) => {
 const findAuditByCity = async (city) => {
  return await auditRepository.findAuditByCity(city);
 }
+const getAllIssuesAudits = async () => {
+    return await auditRepository.findAllIssuesAudits();
+};
 export default {
     getAllAudits,
     getAuditById,
     auditIssues,
     auditWeathers,
-    findAuditByCity
+    findAuditByCity,
+    getAllIssuesAudits
 };

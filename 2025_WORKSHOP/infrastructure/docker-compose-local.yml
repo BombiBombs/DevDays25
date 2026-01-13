@@ -14,6 +14,8 @@ services:
     build:
       context: ../../dev-days-25-frontend 
       dockerfile: Dockerfile
+      args:
+        NODE_PUBLIC_API_URL: http://devdays-app:3000/api/v1
     restart: unless-stopped
     ports:
       - "8080:3000"
@@ -32,14 +34,18 @@ services:
       - db
 
   devdays-app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
     image: devdays-app:latest
     restart: unless-stopped
     environment:
       PORT: 3000
       MONGO_URI: mongodb://devdays-mongo:27017/isadevdays2025
-      OPENAI_API_KEY: ${OPENAI_API_KEY2}
+      OPENAI_API_KEY2: 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
     ports:
-      - "${HOST_PORT:-3000}:3000"
+      - "3000:3000"
+      - "9464:9464"
     depends_on:
       - devdays-mongo
     networks:
@@ -52,6 +58,8 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
+    networks:
+      - backend
 
   grafana:
     image: grafana/grafana
@@ -60,6 +68,8 @@ services:
       - "3003:3000" # Entraremos por el 3003 para no chocar con nada
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - backend
 
 volumes:
   mongo_data:

@@ -13,11 +13,10 @@ app.use(express.json());
 app.use('/api/v1', aiRouter);
 
 app.use(cors({
-  origin: 'http://localhost:3001', // La URL del frontend de Next.js
+  origin: ['http://localhost:3001', 'http://localhost:8080'], // La URL del frontend de Next.js
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
-
 app.use('/api/v1', auditRouter);
 app.get('/', (req, res) => {
     res.send('Hello World!');

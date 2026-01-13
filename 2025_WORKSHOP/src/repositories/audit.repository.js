@@ -15,9 +15,13 @@ const create = async (auditData) => {
 const findAuditByCity = async (city) => {
  return await Audit.find({ 'metadata.ciudad': city });
 }
+const findAllIssuesAudits = async () => {
+return await Audit.find({ 'metadata.totalIssues': { $exists: true } });
+}
 export default {
  findAll,
  create,
  findByAuditId,
- findAuditByCity
+ findAuditByCity,
+ findAllIssuesAudits
 };

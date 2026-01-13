@@ -51,3 +51,14 @@ export const findAuditByCity = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+export const getAllIssuesAudits = async (req, res) => {
+    console.log("¡HE ENTRADO EN LA RUTA DE ISSUES!");
+    try {
+        const issuesAudits = await auditService.getAllIssuesAudits();
+        console.log("Auditorías encontradas:", issuesAudits.length);
+        res.status(200).json(issuesAudits);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
